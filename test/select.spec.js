@@ -2005,7 +2005,43 @@ describe('ui-select tests', function () {
 
       el.find('.ui-select-match-item').first().find('.ui-select-match-close').click();
       expect(el.scope().$select.sizeSearchInput).toHaveBeenCalled();
+    });
 
+    it('input should take the whole remaining part of the current row, or, if smaller than the min input width, go to the next row', function () {
+      //scope.selection.selectedMultiple = [scope.people[4], scope.people[5]]; //Wladimir & Samantha
+      var el = createUiSelectMultiple({
+        tagging: '',
+        taggingLabel: 'false'
+      });
+
+      //angular.element(document.body).css("width", "100%");
+      angular.element(document.body).append(el);
+      $timeout.flush(); // needed to make input take it's real width, not 4 or 10 px
+
+      var searchInput = el.find('.ui-select-search');
+
+      // no item selected, input should fill the whole row
+      expect(searchInput.outerWidth()).toBe(792);
+
+      clickItem(el, 'Wladimir');
+      $timeout.flush();
+      // 2 items are selected, input should be less than 100%
+      expect(searchInput.outerWidth()).toBe(548); // remaining width of the row
+
+      clickItem(el, 'Samantha');
+      $timeout.flush();
+      // input should be even smaller than before
+      expect(searchInput.outerWidth()).toBe(304);
+
+      clickItem(el, 'Adrian');
+      $timeout.flush();
+      // min input width is 50px (unfortunately hardcoded), so we are still in the first row
+      expect(searchInput.outerWidth()).toBe(98);
+
+      clickItem(el, 'Nicole');
+      $timeout.flush();
+      // input goes to the second row and should still fill the whole row minus the item width (whole row should be clickable)
+      expect(searchInput.outerWidth()).toBe(649);
     });
 
     it('should update size of search input use container width', function () {

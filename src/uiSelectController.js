@@ -528,14 +528,14 @@ uis.controller('uiSelectCtrl',
         container = ctrl.$element[0],
         calculateContainerWidth = function() {
           // Return the container width only if the search input is visible
-          return container.clientWidth * !!input.offsetParent;
+          return $(container).width() * !!input.offsetParent; // width must be WITHOUT padding - to calculate space for text correctly
         },
         updateIfVisible = function(containerWidth) {
           if (containerWidth === 0) {
             return false;
           }
           var inputWidth = containerWidth - input.offsetLeft;
-          if (inputWidth < 50) inputWidth = containerWidth;
+          if (inputWidth < 50) inputWidth = containerWidth; // TODO make 50 a parameter (minInputWidth) which can be set by user
           ctrl.searchInput.css('width', inputWidth+'px');
           return true;
         };
