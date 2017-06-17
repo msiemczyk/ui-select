@@ -2014,7 +2014,8 @@ describe('ui-select tests', function () {
         taggingLabel: 'false'
       });
 
-      //angular.element(document.body).css("width", "100%");
+      angular.element(document.body).css("width", "100%");
+      el.css("width", "800px !important");
       angular.element(document.body).append(el);
       $timeout.flush(); // needed to make input take it's real width, not 4 or 10 px
 
@@ -2026,6 +2027,7 @@ describe('ui-select tests', function () {
       clickItem(el, 'Wladimir');
       $timeout.flush();
       // 2 items are selected, input should be less than 100%
+      console.log('test', searchInput.outerWidth(), searchInput.width()); // TODO delete
       expect(searchInput.outerWidth()).toBe(548); // remaining width of the row
 
       clickItem(el, 'Samantha');
