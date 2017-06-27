@@ -2027,7 +2027,6 @@ describe('ui-select tests', function () {
       clickItem(el, 'Wladimir');
       $timeout.flush();
       // 2 items are selected, input should be less than 100%
-      console.log('test', searchInput.outerWidth(), searchInput.width()); // TODO delete
       expect(searchInput.outerWidth()).toBe(548); // remaining width of the row
 
       clickItem(el, 'Samantha');
