@@ -22,6 +22,7 @@ uis.controller('uiSelectCtrl',
   ctrl.spinnerEnabled = uiSelectConfig.spinnerEnabled;
   ctrl.spinnerClass = uiSelectConfig.spinnerClass;
   ctrl.removeSelected = uiSelectConfig.removeSelected; //If selected item(s) should be removed from dropdown list
+  ctrl.minInputWidth = uiSelectConfig.minInputWidth;
   ctrl.closeOnSelect = true; //Initialized inside uiSelect directive link function
   ctrl.skipFocusser = false; //Set to true to avoid returning focus to ctrl when item is selected
   ctrl.search = EMPTY_SEARCH;
@@ -535,7 +536,7 @@ uis.controller('uiSelectCtrl',
             return false;
           }
           var inputWidth = containerWidth - input.offsetLeft;
-          if (inputWidth < 50) inputWidth = containerWidth; // TODO make 50 a parameter (minInputWidth) which can be set by user
+          if (inputWidth < ctrl.minInputWidth) inputWidth = containerWidth;
           ctrl.searchInput.css('width', inputWidth+'px');
           return true;
         };

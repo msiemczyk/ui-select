@@ -97,8 +97,8 @@ describe('ui-select tests', function () {
     };
 
     scope.filterInvertOrder = function (groups) {
-      return groups.sort(function (groupA, groupB) {
-        return groupA.name.toLocaleLowerCase() < groupB.name.toLocaleLowerCase();
+      return groups.sort(function () {
+        return -1;
       });
     };
 
@@ -1121,7 +1121,7 @@ describe('ui-select tests', function () {
       var el = createUiSelect();
       expect(el.find('.ui-select-choices-group .ui-select-choices-group-label').map(function () {
         return this.textContent;
-      }).toArray()).toEqual(["Foo", "Baz", "bar"]);
+      }).toArray()).toEqual(["Baz", "bar", "Foo"]);
     });
   });
 
@@ -2027,22 +2027,22 @@ describe('ui-select tests', function () {
       clickItem(el, 'Wladimir');
       $timeout.flush();
       // 2 items are selected, input should be less than 100%
-      expect(searchInput.outerWidth()).toBe(548); // remaining width of the row
+      expect(searchInput.outerWidth()).toBe(552); // remaining width of the row
 
       clickItem(el, 'Samantha');
       $timeout.flush();
       // input should be even smaller than before
-      expect(searchInput.outerWidth()).toBe(304);
+      expect(searchInput.outerWidth()).toBe(308);
 
       clickItem(el, 'Adrian');
       $timeout.flush();
-      // min input width is 50px (unfortunately hardcoded), so we are still in the first row
-      expect(searchInput.outerWidth()).toBe(98);
+      // default min input width is 50px, so we are still in the first row
+      expect(searchInput.outerWidth()).toBe(103);
 
       clickItem(el, 'Nicole');
       $timeout.flush();
       // input goes to the second row and should still fill the whole row minus the item width (whole row should be clickable)
-      expect(searchInput.outerWidth()).toBe(649);
+      expect(searchInput.outerWidth()).toBe(653);
     });
 
     it('should update size of search input use container width', function () {

@@ -94,6 +94,12 @@ uis.directive('uiSelect',
           $select.limit = (angular.isDefined(attrs.limit)) ? parseInt(attrs.limit, 10) : undefined;
         });
 
+        attrs.$observe('minInputWidth', function() {
+          // In multiple mode define minimum width of input (clickable area).
+          $select.minInputWidth = angular.isDefined(attrs.minInputWidth) ?
+              parseInt(attrs.minInputWidth, 10) : uiSelectConfig.minInputWidth;
+        });
+
         scope.$watch('removeSelected', function() {
             var removeSelected = scope.$eval(attrs.removeSelected);
             $select.removeSelected = removeSelected !== undefined ? removeSelected : uiSelectConfig.removeSelected;
