@@ -1,6 +1,5 @@
 module.exports = function(config) {
   config.set({
-
     // Base path, that will be used to resolve files and exclude
     basePath: '',
 
@@ -38,8 +37,6 @@ module.exports = function(config) {
     // - Firefox
     // - Opera
     // - Safari (only Mac)
-    // - PhantomJS
-    // - IE (only Windows)
     browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome'],
 
     // Continuous Integration mode

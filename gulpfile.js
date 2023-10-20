@@ -1,14 +1,13 @@
-var fs = require('fs');
-var del = require('del');
-var gulp = require('gulp');
-var streamqueue = require('streamqueue');
-var karma = require('karma').server;
-var $ = require('gulp-load-plugins')();
-var runSequence = require('run-sequence');
-var conventionalRecommendedBump = require('conventional-recommended-bump');
-var titleCase = require('title-case');
+let fs = require('fs');
+let del = require('del');
+let gulp = require('gulp');
+let streamqueue = require('streamqueue');
+let KarmaServer = require('karma').Server;
+let $ = require('gulp-load-plugins')();
+let conventionalRecommendedBump = require('conventional-recommended-bump');
+let titleCase = require('title-case');
 
-var config = {
+const config = {
   pkg : JSON.parse(fs.readFileSync('./package.json')),
   banner:
       '/*!\n' +
@@ -19,31 +18,26 @@ var config = {
       ' */\n\n\n'
 };
 
-gulp.task('default', ['build','test']);
-gulp.task('build', ['scripts', 'styles']);
-gulp.task('test', ['build', 'karma']);
+function cleanTask() {
+  return del(['dist', 'temp']);
+}
 
-gulp.task('watch', ['build','karma-watch'], function() {
-  gulp.watch(['src/**/*.{js,html}'], ['build']);
-});
+function scriptsTask() {
+  let buildTemplates = function () {
+    const pathSeparator = require('path').sep;
 
-gulp.task('clean', function(cb) {
-  del(['dist', 'temp'], cb);
-});
-
-gulp.task('scripts', ['clean'], function() {
-
-  var buildTemplates = function () {
     return gulp.src('src/**/*.html')
       .pipe($.minifyHtml({
              empty: true,
              spare: true,
              quotes: true
             }))
-      .pipe($.angularTemplatecache({module: 'ui.select'}));
+      .pipe($.angularTemplatecache({
+        module: 'ui.select',
+        transformUrl: (url) => url.replace(pathSeparator, '')}));
   };
 
-  var buildLib = function(){
+  let buildLib = function(){
     return gulp.src(['src/common.js','src/*.js'])
       .pipe($.plumber({
         errorHandler: handleError
@@ -71,11 +65,9 @@ gulp.task('scripts', ['clean'], function() {
     .pipe($.concat('select.min.js'))
     .pipe($.sourcemaps.write('./'))
     .pipe(gulp.dest('dist'));
+}
 
-});
-
-gulp.task('styles', ['clean'], function() {
-
+function stylesTask() {
   return gulp.src(['src/common.css'], {base: 'src'})
     .pipe($.sourcemaps.init())
     .pipe($.header(config.banner, {
@@ -87,16 +79,59 @@ gulp.task('styles', ['clean'], function() {
     .pipe($.concat('select.min.css'))
     .pipe($.sourcemaps.write('../dist', {debug: true}))
     .pipe(gulp.dest('dist'));
+}
 
-});
+function karmaTask(cb) {
+  new KarmaServer({configFile : __dirname +'/karma.conf.js', singleRun: true}, cb).start();
+}
 
-gulp.task('karma', ['build'], function() {
-  karma.start({configFile : __dirname +'/karma.conf.js', singleRun: true});
-});
+function karmaWatchTask(cb) {
+  gulp.watch(['src/**/*.{js,html}'], gulp.series(['build']));
 
-gulp.task('karma-watch', ['build'], function() {
-  karma.start({configFile :  __dirname +'/karma.conf.js', singleRun: false});
-});
+  new KarmaServer({configFile : __dirname +'/karma.conf.js', singleRun: false}, cb).start();
+}
+
+function cleanDocsTask() {
+  return del(['docs-built']);
+}
+
+function docsAssetsTask() {
+  gulp.src('./dist/*').pipe(gulp.dest('./docs-built/dist'));
+  return gulp.src('docs/assets/*').pipe(gulp.dest('./docs-built/assets'));
+}
+
+function docsExamplesTask() {
+  // Need a way to reset filename list: $.filenames('exampleFiles',{overrideMode:true});
+  return gulp.src(['docs/examples/*.html'])
+    .pipe($.header(fs.readFileSync('docs/partials/_header.html')))
+    .pipe($.footer(fs.readFileSync('docs/partials/_footer.html')))
+    .pipe($.filenames('exampleFiles'))
+    .pipe(gulp.dest('./docs-built/'));
+}
+
+function docsIndexTask() {
+  let exampleFiles = $.filenames.get('exampleFiles');
+  exampleFiles = exampleFiles.map(function (filename) {
+    let cleaned = titleCase(filename.replace('demo-', '').replace('.html', ''));
+    return '<h4><a href="./' + filename + '">' + cleaned + '</a> <plnkr-opener example-path="' + filename + '"></plnkr-opener></h4>';
+  });
+
+  return gulp.src('docs/index.html')
+    .pipe($.replace('<!-- INSERT EXAMPLES HERE -->', exampleFiles.join("\n")))
+    .pipe(gulp.dest('./docs-built/'));
+}
+
+let build = gulp.series(cleanTask, gulp.parallel(scriptsTask, stylesTask));
+
+exports.default = gulp.series(build, karmaTask);
+exports.clean = cleanTask;
+exports.scripts = gulp.series(cleanTask, scriptsTask);
+exports.styles = gulp.series(cleanTask, stylesTask);
+exports.build = build;
+exports.test = gulp.series(build, karmaTask);
+exports.watch = gulp.series(build, karmaWatchTask);
+exports['docs:clean'] = cleanDocsTask;
+exports.docs = gulp.series(cleanDocsTask, gulp.parallel(docsAssetsTask, docsExamplesTask), docsIndexTask);
 
 gulp.task('pull', function(done) {
   $.git.pull();
@@ -128,8 +163,7 @@ gulp.task('recommendedBump', function(done) {
 });
 
 gulp.task('changelog', function() {
-
-  return gulp.src('CHANGELOG.md', {buffer: false})
+  return gulp.src('CHANGELOG.md')
     .pipe($.conventionalChangelog({preset: 'angular'}))
     .pipe(gulp.dest('./'));
 });
@@ -152,50 +186,15 @@ gulp.task('tag', function() {
     .pipe($.tagVersion());
 });
 
-gulp.task('bump', function(done) {
-  runSequence('recommendedBump', 'changelog', 'add', 'commit', 'tag', 'push', done);
+gulp.task('bump', function() {
+  return gulp.series('recommendedBump', 'changelog', 'add', 'commit', 'tag', 'push');
 });
 
-gulp.task('docs', function (cb) {
-  runSequence('docs:clean', 'docs:examples', 'docs:assets', 'docs:index', cb);
-});
+gulp.task('docs:watch', gulp.series([exports.docs], function() {
+  gulp.watch(['docs/**/*.{js,html}'], gulp.series([exports.docs]));
+}));
 
-gulp.task('docs:clean', function (cb) {
-  del(['docs-built'], cb)
-});
-
-gulp.task('docs:assets', function () {
-  gulp.src('./dist/*').pipe(gulp.dest('./docs-built/dist'));
-  return gulp.src('docs/assets/*').pipe(gulp.dest('./docs-built/assets'));
-});
-
-gulp.task('docs:examples', function () {
-  // Need a way to reset filename list: $.filenames('exampleFiles',{overrideMode:true});
-  return gulp.src(['docs/examples/*.html'])
-    .pipe($.header(fs.readFileSync('docs/partials/_header.html')))
-    .pipe($.footer(fs.readFileSync('docs/partials/_footer.html')))
-    .pipe($.filenames('exampleFiles'))
-    .pipe(gulp.dest('./docs-built/'));
-});
-
-gulp.task('docs:index', function () {
-
-  var exampleFiles = $.filenames.get('exampleFiles');
-  exampleFiles = exampleFiles.map(function (filename) {
-    var cleaned = titleCase(filename.replace('demo-', '').replace('.html', ''));
-    return '<h4><a href="./' + filename + '">' + cleaned + '</a> <plnkr-opener example-path="' + filename + '"></plnkr-opener></h4>';
-  });
-
-  return gulp.src('docs/index.html')
-    .pipe($.replace('<!-- INSERT EXAMPLES HERE -->', exampleFiles.join("\n")))
-    .pipe(gulp.dest('./docs-built/'));
-});
-
-gulp.task('docs:watch', ['docs'], function() {
-  gulp.watch(['docs/**/*.{js,html}'], ['docs']);
-});
-
-var handleError = function (err) {
+let handleError = function (err) {
   console.log(err.toString());
   this.emit('end');
 };
