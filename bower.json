@@ -1,6 +1,6 @@
 {
   "name": "angular-ui-select",  
-  "homepage": "https://github.com/angular-ui/ui-select",
+  "homepage": "https://github.com/msiemczyk/ui-select",
   "authors": [
     "AngularUI"
   ],
@@ -21,11 +21,11 @@
     "examples"
   ],
   "dependencies": {
-    "angular": ">=1.2.18"
+    "angular": ">=1.8.3"
   },
   "devDependencies": {
     "jquery": "~1.11",
-    "angular-sanitize": ">=1.2.18",
-    "angular-mocks": ">=1.2.18"
+    "angular-sanitize": ">=1.8.3",
+    "angular-mocks": ">=1.8.3"
   }
 }
