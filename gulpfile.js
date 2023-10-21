@@ -186,9 +186,7 @@ gulp.task('tag', function() {
     .pipe($.tagVersion());
 });
 
-gulp.task('bump', function() {
-  return gulp.series('recommendedBump', 'changelog', 'add', 'commit', 'tag', 'push');
-});
+gulp.task('bump', gulp.series('recommendedBump', 'changelog', 'add', 'commit', 'tag', 'push'));
 
 gulp.task('docs:watch', gulp.series([exports.docs], function() {
   gulp.watch(['docs/**/*.{js,html}'], gulp.series([exports.docs]));
