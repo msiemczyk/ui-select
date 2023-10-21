@@ -7,7 +7,7 @@
     "url": "git://github.com/msiemczyk/ui-select.git"
   },
   "style": "dist/select.css",
-  "version": "0.19.8-agfa",
+  "version": "0.19.9-agfa",
   "devDependencies": {
     "angular": "^1.8.3",
     "angular-mocks": "^1.8.3",

@@ -1,3 +1,17 @@
+## [0.19.9-agfa](https://github.com/msiemczyk/ui-select/compare/v0.19.8...v0.19.9-agfa) (2023-10-21)
+
+
+### Bug Fixes
+
+* **uiSelectCtrl:** fix input width calculations ([66cf8f0](https://github.com/msiemczyk/ui-select/commit/66cf8f08ec3ca1c467a8ebb8f34fc3bedef033f7)), closes [#1980](https://github.com/msiemczyk/ui-select/issues/1980) [#2010](https://github.com/msiemczyk/ui-select/issues/2010)
+
+
+### Features
+
+* **multiple:** add minInputWidth settings to address previous fix TODO ([b1e2981](https://github.com/msiemczyk/ui-select/commit/b1e298119398e38583ea575c3dbb6c8461dd9ef6))
+
+
+
 <a name="0.19.8"></a>
 ## [0.19.8](https://github.com/angular-ui/ui-select/compare/v0.19.7...v0.19.8) (2017-04-15)
 
